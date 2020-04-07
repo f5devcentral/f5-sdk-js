@@ -1,0 +1,27 @@
+image: node:latest
+
+stages:
+    - test
+
+variables:
+    ARTIFACTORY_SERVER: "$ARTIFACTORY_SERVER"
+    GIT_SECRETS_VERSION: '1.3.0'
+    GIT_SECRETS_PKG_URL: "https://github.com/awslabs/git-secrets/archive/${GIT_SECRETS_VERSION}.tar.gz"
+
+# check for disallowed content within any file in source control, this
+# supplements the native pre-receive push rules built into GitLab for secrets
+# note: .gitallowed is used for exceptions
+check_content:
+    image: f5devcentral/containthedocs:rpmbuild
+    stage: test
+    script:
+        # install git-secrets
+        - curl -q -L -o git_secrets.tar.gz ${GIT_SECRETS_PKG_URL}
+        - tar xzf git_secrets.tar.gz
+        - cd git-secrets-${GIT_SECRETS_VERSION} && make install && cd ..
+        # now, add any patterns to disallow
+        - git secrets --add '.*f5.*\.com'
+        # scan
+        - git secrets --scan
+    tags:
+        - cm-official-docker-executor
