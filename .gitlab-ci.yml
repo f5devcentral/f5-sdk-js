@@ -2,15 +2,40 @@ image: node:latest
 
 stages:
     - test
+    - build
+    - publish
 
 variables:
     ARTIFACTORY_SERVER: "$ARTIFACTORY_SERVER"
     GIT_SECRETS_VERSION: '1.3.0'
     GIT_SECRETS_PKG_URL: "https://github.com/awslabs/git-secrets/archive/${GIT_SECRETS_VERSION}.tar.gz"
 
-# check for disallowed content within any file in source control, this
-# supplements the native pre-receive push rules built into GitLab for secrets
-# note: .gitallowed is used for exceptions
+# run linter
+linter:
+    stage: test
+    script:
+        - npm install
+        - npm run lint
+    tags:
+        - cm-official-docker-executor
+
+# run unit tests
+unit_tests:
+    stage: test
+    script:
+        - npm install
+        - npm run test
+    artifacts:
+        name: ${CI_COMMIT_REF_NAME}_unit_test_coverage
+        paths:
+            - coverage
+        expire_in: 1 month
+    tags:
+        - cm-official-docker-executor
+
+# check for disallowed content in all files, this supplements
+# the native pre-receive push rules built into GitLab for secrets
+# NOTE: .gitallowed is used for exceptions
 check_content:
     image: f5devcentral/containthedocs:rpmbuild
     stage: test
@@ -25,3 +50,45 @@ check_content:
         - git secrets --scan
     tags:
         - cm-official-docker-executor
+
+# build code documentation
+code_docs:
+    stage: build
+    script:
+        - npm install
+        - npm run build-code-docs
+    artifacts:
+        name: ${CI_COMMIT_REF_NAME}_code_docs
+        paths:
+            - code_docs
+        expire_in: 1 month
+    tags:
+        - cm-official-docker-executor
+
+# publish docs to internal pages: - this job MUST be named 'pages'
+pages:
+    stage: publish
+    environment:
+        name: staging
+        url: https://${CI_PROJECT_NAMESPACE}.${PAGES_DOMAIN}/${CI_PROJECT_NAME}
+    tags:
+        - cm-official-docker-executor
+    script:
+        - echo "URL https://${CI_PROJECT_NAMESPACE}.${PAGES_DOMAIN}/${CI_PROJECT_NAME}"
+        - PUBLIC_DIR='./public'
+        - mkdir -p ${PUBLIC_DIR}
+        # place index.html in public directory: /
+        - cp docs/index.html ${PUBLIC_DIR}/index.html
+        # place test coverage report in public directory: /coverage
+        - COVERAGE_DOCS=${PUBLIC_DIR}/coverage
+        - mkdir -p ${COVERAGE_DOCS}
+        - cp -R coverage/* ${COVERAGE_DOCS}
+        # place code documentation in public directory: /code-docs
+        - CODE_DOCS=${PUBLIC_DIR}/code-docs
+        - mkdir -p ${CODE_DOCS}
+        - cp -R code_docs/* ${CODE_DOCS}
+    artifacts:
+        paths:
+            - public
+    only:
+        - develop
