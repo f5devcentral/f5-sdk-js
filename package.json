@@ -1,0 +1,53 @@
+{
+    "name": "f5-sdk-js",
+    "author": "F5 Networks",
+    "version": "0.9.0",
+    "description": "F5 SDK for JavaScript (via Typescript)",
+    "license": "Apache-2.0",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "lint": "tsc --noEmit && eslint 'src/**/*.{js,ts,tsx}' 'tests/**/*.{js,ts,tsx}'",
+        "test": "nyc mocha -r ts-node/register tests/**/*Tests.ts",
+        "build-code-docs": "typedoc --out code_docs src",
+        "build-package": "tsc"
+    },
+    "dependencies": {
+        "axios": "^0.19.2"
+    },
+    "devDependencies": {
+        "@types/assert": "^1.4.6",
+        "@types/mocha": "^7.0.2",
+        "@types/node": "^13.11.0",
+        "@types/sinon": "^9.0.0",
+        "@typescript-eslint/eslint-plugin": "^2.27.0",
+        "@typescript-eslint/parser": "^2.27.0",
+        "assert": "^2.0.0",
+        "eslint": "^6.8.0",
+        "mocha": "^7.1.1",
+        "nyc": "^15.0.1",
+        "nock": "^12.0.3",
+        "sinon": "^9.0.1",
+        "ts-node": "^8.8.2",
+        "typedoc": "^0.17.4",
+        "typescript": "^3.8.3"
+    },
+    "nyc": {
+        "check-coverage": true,
+        "lines": 80,
+        "functions": 80,
+        "branches": 80,
+        "statements": 80,
+        "reporter": [
+            "html",
+            "text"
+        ],
+        "cache": false
+    },
+    "eslintConfig": {
+        "parser": "@typescript-eslint/parser",
+        "extends": [
+            "plugin:@typescript-eslint/recommended"
+        ]
+    }
+}

@@ -6,7 +6,7 @@ Benefits:
 
 - Provides hand-written or auto-generated client code to make F5’s APIs/services simple and intuitive to use.
 - Handles the low-level details of communication with the API or service, including authentication sessions, async task handling, protocol handling, large file uploads, and more.
-- Can be installed using familiar package management tools such as pip.
+- Can be installed using familiar package management tools such as npm.
 
 ## Table of Contents
 
@@ -16,20 +16,42 @@ Benefits:
 ## Usage
 
 ```javascript
-// TODO: insert example
+const ManagementClient = require('f5-sdk-js').bigip.ManagementClient;
+
+const mgmtClient = new ManagementClient({
+    host: '192.0.2.1',
+    port: 443,
+    user: 'admin',
+    password: 'admin'
+})
+await mgmtClient.login();
+await mgmtClient.makeRequest('/mgmt/tm/sys/version');
 ```
+
+Note: Typescript import would look like `import { ManagementClient } from 'f5-sdk-js'.bigip;`
 
 ## User Documentation
 
-TODO
+N/A
+
+## Contributor Documentation
+
+A collection of helpful commands have been added to the package manager (npm) scripts directive.  Check out the `package.json` for an up-to-date list of commands. 
+
+- Build Package (Typescript -> Javascript): `npm run build-package`
+- Build Code Documentation: `npm run build-code-docs`
+- Run Unit Tests: `npm run test`
+- Run Linter: `npm run lint`
+
+Note that the `main` and `types` package manager directive are pointed at the `dist` folder (where `tsc` builds the package).  Please ensure any published packages builds and includes that folder.
 
 ## Source Repository
 
-TODO
+N/A
 
 ## Filing Issues and Getting Help
 
-TODO
+N/A
 
 ## Copyright
 
