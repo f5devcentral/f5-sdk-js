@@ -15,8 +15,6 @@ import * as httpUtils from '../utils/http';
  * Basic Example:
  * 
  * ```
- * import { ManagementClient } from 'f5-sdk-js'.bigip;
- * 
  * const mgmtClient = new ManagementClient({
  *      host: '192.0.2.1',
  *      port: 443,
@@ -85,6 +83,9 @@ export class ManagementClient {
     async makeRequest(uri: string, options?: {
         method?: string;
         headers?: object;
+        body?: object;
+        contentType?: string;
+        advancedReturn?: boolean;
     }): Promise<object>  {
         options = options || {};
 
@@ -92,11 +93,13 @@ export class ManagementClient {
             this.host,
             uri,
             {
-                method: 'GET',
+                method: options.method || 'GET',
                 port: this.port,
-                headers: Object.assign(options['headers'] || {}, {
+                headers: Object.assign(options.headers || {}, {
                     'X-F5-Auth-Token': this._token
-                })
+                }),
+                body: options.body || undefined,
+                advancedReturn: options.advancedReturn || false
             }
         );
     }

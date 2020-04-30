@@ -8,7 +8,7 @@
     "types": "dist/index.d.ts",
     "scripts": {
         "lint": "tsc --noEmit && eslint 'src/**/*.{js,ts,tsx}' 'tests/**/*.{js,ts,tsx}'",
-        "test": "nyc mocha -r ts-node/register tests/**/*Tests.ts",
+        "test": "nyc mocha -r ts-node/register \"tests/**/*Tests.ts\"",
         "build-code-docs": "typedoc --out code_docs src",
         "build-package": "tsc"
     },
@@ -49,5 +49,8 @@
         "extends": [
             "plugin:@typescript-eslint/recommended"
         ]
+    },
+    "mocha": {
+        "timeout": 10000
     }
 }
