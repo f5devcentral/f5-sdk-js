@@ -11,12 +11,13 @@ Benefits:
 ## Table of Contents
 
 - [Usage](#usage)
-- [User Documentation](#user-documentation)
 
 ## Usage
 
+Basic Example:
 ```javascript
 const ManagementClient = require('f5-sdk-js').bigip.ManagementClient;
+const AS3Client = require('f5-sdk-js').bigip.extension.AS3Client;
 
 const mgmtClient = new ManagementClient({
     host: '192.0.2.1',
@@ -25,10 +26,18 @@ const mgmtClient = new ManagementClient({
     password: 'admin'
 })
 await mgmtClient.login();
-await mgmtClient.makeRequest('/mgmt/tm/sys/version');
+
+const extensionClient = new AS3Client(mgmtClient);
+await extensionClient.service.create({ config: {} });
 ```
 
-Note: Typescript import would look like `import { ManagementClient } from 'f5-sdk-js'.bigip;`
+Typescript Import Example:
+```typescript
+import { bigip } from 'f5-sdk-js';
+
+const ManagementClient = bigip.ManagementClient;
+const AS3Client = bigip.extension.AS3Client;
+```
 
 ## User Documentation
 

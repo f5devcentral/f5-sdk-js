@@ -8,6 +8,7 @@
 
 'use strict';
 
+import * as fs from 'fs';
 import https from 'https';
 import axios from 'axios';
 
@@ -31,6 +32,7 @@ export async function makeRequest(host: string, uri: string, options?: {
     body?: object;
     headers?: object;
     basicAuth?: object;
+    advancedReturn?: boolean;
 }): Promise<object> {
     options = options || {};
 
@@ -52,12 +54,62 @@ export async function makeRequest(host: string, uri: string, options?: {
         validateStatus: null
     });
 
+    // check for advanced return
+    if (options.advancedReturn) {
+        return {
+            statusCode: httpResponse.status,
+            body: httpResponse.data
+        }
+    }
+
     // check for unsuccessful request
     if (httpResponse.status > 300) {
         return Promise.reject(new Error(
             `HTTP request failed: ${httpResponse.status} ${miscUtils.stringify(httpResponse.data)}`
         ));
     }
-
+    // return response body
     return httpResponse.data;
+}
+
+/**
+ * Download HTTP payload to file
+ *
+ * @param url  url
+ * @param file local file location where the downloaded contents should go
+ *
+ * @returns void
+ */
+export async function downloadToFile(url: string, file: string): Promise<void> {
+    await new Promise(((resolve) => {
+        axios({
+            httpsAgent: new https.Agent({
+                rejectUnauthorized: false
+            }),
+            method: 'GET',
+            url,
+            responseType: 'stream'
+        })
+        .then(function (response) {
+            response.data.pipe(fs.createWriteStream(file))
+                .on('finish', resolve);
+        })
+    }));
+}
+
+/**
+ * Parse URL
+ *
+ * @param url  url
+ *
+ * @returns parsed url properties
+ */
+export function parseUrl(url: string): {
+    host: string;
+    path: string;
+} {
+    return {
+        host: url.split('://')[1].split('/')[0],
+        path: `/${url.split('://')[1].split('/').slice(1).join('/')}`
+    };
 }

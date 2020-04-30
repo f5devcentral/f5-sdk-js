@@ -8,8 +8,7 @@
 
 'use strict';
 
-import * as _extension from './extension';
-
-export { ManagementClient } from './managementClient';
-
-export const extension = _extension;
+export { AS3Client } from './clients/AS3';
+export { DOClient } from './clients/DO';
+export { TSClient } from './clients/TS';
+export { CFClient } from './clients/CF';

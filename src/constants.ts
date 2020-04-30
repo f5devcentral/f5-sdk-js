@@ -8,8 +8,15 @@
 
 'use strict';
 
-import * as _extension from './extension';
-
-export { ManagementClient } from './managementClient';
-
-export const extension = _extension;
+export const TMP_DIR = '/tmp';
+export const HTTP_STATUS_CODES = {
+    ACCEPTED: 202,
+    OK: 200
+};
+export const RETRY = {
+    DEFAULT_COUNT: 100,
+    DELAY_IN_MS: 1000
+};
+export const ENV_VARS = {
+    LOG_LEVEL: 'F5_SDK_LOG_LEVEL'
+};

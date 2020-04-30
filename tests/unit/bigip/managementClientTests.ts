@@ -11,33 +11,19 @@
 import assert from 'assert';
 import nock from 'nock';
 
-import { ManagementClient } from '../../src/bigip';
+import { getManagementClient, defaultHost } from './fixtureUtils';
 
 describe('BIG-IP: Management Client', function() {
     let mgmtClient;
-    const defaultHost = '192.0.2.1';
-    const defaultPort = 443;
-    const defaultUser = 'admin';
-    const defaultPassword = 'admin';
 
     beforeEach(function() {
-        mgmtClient = new ManagementClient({
-            host: defaultHost,
-            port: defaultPort,
-            user: defaultUser,
-            password: defaultPassword
-        });
+        mgmtClient = getManagementClient();
     });
     afterEach(function() {
         if(!nock.isDone()) {
-            throw new Error('Not all nock interceptors were used!')
+            throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`)
         }
         nock.cleanAll();
-    })
-
-    it('should init', function() {
-        assert.strictEqual(mgmtClient.host, defaultHost);
-        assert.strictEqual(mgmtClient.port, defaultPort);
     });
 
     it('should login', async function() {
