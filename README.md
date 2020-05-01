@@ -39,28 +39,26 @@ const ManagementClient = bigip.ManagementClient;
 const AS3Client = bigip.extension.AS3Client;
 ```
 
-## User Documentation
-
-N/A
-
 ## Contributor Documentation
 
-A collection of helpful commands have been added to the package manager (npm) scripts directive.  Check out the `package.json` for an up-to-date list of commands. 
+A collection of helpful commands have been added to the package manager (npm) scripts directive. Check out the `package.json` for an up-to-date list of commands. 
 
 - Build Package (Typescript -> Javascript): `npm run build-package`
 - Build Code Documentation: `npm run build-code-docs`
 - Run Unit Tests: `npm run test`
 - Run Linter: `npm run lint`
 
-Note that the `main` and `types` package manager directive are pointed at the `dist` folder (where `tsc` builds the package).  Please ensure any published packages builds and includes that folder.
+Note that the `main` and `types` package manager directive are pointed at the `dist` folder (where `tsc` builds the package). Please ensure any published packages builds and includes that folder.
 
 ## Source Repository
 
-N/A
+See the source repository [here](https://github.com/f5devcentral/f5-sdk-js).
 
 ## Filing Issues and Getting Help
 
-N/A
+If you come across a bug or other issue when using the SDK, use [GitHub Issues](https://github.com/f5devcentral/f5-sdk-js/issues) to submit an issue for our team. You can also see the current known issues on that page, which are tagged with a Known Issue label.  
+
+F5 SDK is community-supported. For more information, see the [Support page](SUPPORT.md).
 
 ## Copyright
 
