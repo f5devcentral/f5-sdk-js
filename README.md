@@ -11,6 +11,7 @@ Benefits:
 ## Table of Contents
 
 - [Usage](#usage)
+- [User Documentation](#user-documentation)
 
 ## Usage
 
@@ -56,7 +57,7 @@ See the source repository [here](https://github.com/f5devcentral/f5-sdk-js).
 
 ## User Documentation
 
-F5 SDK JS version 0.9.0 is a public preview. Documentation for this feature is coming soon to [clouddocs.f5.com](https://clouddocs.f5.com/). If you have a specific documentation request, you can file an issue through GitHub.
+The F5 SDK (JS) is in public preview. Documentation for this SDK is coming soon to [clouddocs.f5.com](https://clouddocs.f5.com/). If you have a specific documentation request, you can file an issue through GitHub.
 
 ## Filing Issues and Getting Help
 

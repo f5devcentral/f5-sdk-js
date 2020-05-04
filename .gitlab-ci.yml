@@ -92,3 +92,14 @@ pages:
             - public
     only:
         - develop
+
+# publish package to NPM
+publish_package_to_npm:
+    stage: publish
+    tags:
+        - cm-official-docker-executor
+    script:
+        - echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > .npmrc
+        - npm publish
+    only:
+        - tags
