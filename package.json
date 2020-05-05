@@ -1,7 +1,7 @@
 {
     "name": "f5-sdk-js",
     "author": "F5 Networks",
-    "version": "0.9.0",
+    "version": "0.9.1",
     "description": "F5 SDK for JavaScript with Typescript type definitions",
     "license": "Apache-2.0",
     "main": "dist/index.js",
