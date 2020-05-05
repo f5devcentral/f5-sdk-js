@@ -51,6 +51,20 @@ check_content:
     tags:
         - cm-official-docker-executor
 
+# generate/transpile code
+generate_code:
+    stage: build
+    script:
+        - npm install
+        - npm run build-package
+    artifacts:
+        name: ${CI_COMMIT_REF_NAME}_generated_code
+        paths:
+            - dist
+        expire_in: 1 month
+    tags:
+        - cm-official-docker-executor
+
 # build code documentation
 code_docs:
     stage: build
