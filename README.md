@@ -11,7 +11,58 @@ Benefits:
 ## Table of Contents
 
 - [Usage](#usage)
+- [Ben-Work](#ben-work)
 - [User Documentation](#user-documentation)
+
+
+---
+
+## Ben Work
+
+The high level goal here is to make an HTTP client that supports everything we need to take out tools to the next level.
+
+We were going down the path of moving to axios, but axios doesn't really support the depth of connectivity timings we want to gather and it's just another external dependecny...
+
+The timings will include the following:
+```js
+    const eventTimes = {
+        // use process.hrtime() as it's not a subject of clock drift
+        startAt: process.hrtime(),
+        dnsLookupAt: undefined,
+        tcpConnectionAt: undefined,
+        tlsHandshakeAt: undefined,
+        firstByteAt: undefined,
+        endAt: undefined
+    }
+```
+
+Using these timings we can log and provide stats about what devices (mainly f5) are responding slower than other or a gathered base line
+
+### Planned features
+- Full request timings:
+  - Start of request processing
+  - Time it took to resolve dns (if needed)
+  - Time when TCP connection was completed
+  - Time when tls handshake was completed
+  - Time when first byte was recieved
+  - Time when last byte recieved and connection done
+- token timer
+  - Read token TTL and utilize for entire lifetime of token
+  - refresh automatically as needed
+- Service discovery for ATC
+  - What services are installed
+- IPv6 support
+- Support both http and https connections
+  - When connecting to an F5 device only HTTPS will be used
+  - But there may be use cases where http is necessary for some sort of external connection
+- May leave open the option for connecting over a linux socket also...
+- Possible support for following redirects
+- Support for failed auth events
+  - This is to allow the packege to be consumed by any other service, like a command line tool, but also be able to integrate into the vscode extension to clear password cache when authentication fails
+- layered functions that do all the work of uploading/downloadin files and capturing ucs/qkviews
+- Expand ils rpm installs to monitor restjavad/restnoded processes to complete restart for job completion
+
+---
 
 ## Usage
 
