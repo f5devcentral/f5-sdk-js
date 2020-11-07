@@ -50,7 +50,7 @@ export class ServiceClient {
             }
         );
 
-        if (!response['statusCode'].toString().startsWith('2')) {
+        if (!response['status'].toString().startsWith('2')) {
             return false;
         }
         return true;
@@ -75,10 +75,10 @@ export class ServiceClient {
             }
         );
 
-        if (response['statusCode'] === constants.HTTP_STATUS_CODES.ACCEPTED) {
-            return await this._waitForTask(response['body']['selfLink'].split(SELF_LINK_HOST)[1]);
+        if (response['status'] === constants.HTTP_STATUS_CODES.ACCEPTED) {
+            return await this._waitForTask(response['data']['selfLink'].split(SELF_LINK_HOST)[1]);
         }
-        return response['body'];
+        return response['data'];
     }
 
     /**
@@ -113,12 +113,12 @@ export class ServiceClient {
     protected async _checkTaskState(taskUri: string): Promise<object> {
         const taskResponse = await this._mgmtClient.makeRequest(taskUri, { advancedReturn: true });
 
-        if (taskResponse['statusCode'] !== constants.HTTP_STATUS_CODES.OK) {
+        if (taskResponse['status'] !== constants.HTTP_STATUS_CODES.OK) {
             return Promise.reject(
-                new Error(`Task state has not passed: ${taskResponse['statusCode']}`)
+                new Error(`Task state has not passed: ${taskResponse['status']}`)
             );
         }
-        return taskResponse['body'];
+        return taskResponse['data'];
     }
 
     /**

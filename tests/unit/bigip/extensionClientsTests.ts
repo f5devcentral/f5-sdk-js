@@ -97,7 +97,7 @@ function getExtensionClient(component: string, mgmtClient: ManagementClient): an
             await extensionClient.getLatestMetadata();
         });
 
-        describe('Package Operations', function() {
+        describe('Package Operations', async function() {
             it(`should validate package is installed`, async function() {
                 nock(`https://${defaultHost}`)
                     .post('/mgmt/shared/iapp/package-management-tasks')
@@ -246,7 +246,7 @@ function getExtensionClient(component: string, mgmtClient: ManagementClient): an
             });
         });
 
-        describe('Service Operations', function() {
+        describe('Service Operations', async function() {
             it(`should validate service is available`, async function() {
                 nock(`https://${defaultHost}`)
                     .get(FIXED_INFO[component]['endpoints']['primary'])
@@ -271,7 +271,7 @@ function getExtensionClient(component: string, mgmtClient: ManagementClient): an
                     .reply(200, {});
 
                 const response = await extensionClient.service.showInfo();
-                assert.deepStrictEqual(response, {});
+                assert.deepStrictEqual(response.data, {});
             });
 
             it(`should perform create operation`, async function() {
@@ -302,7 +302,7 @@ function getExtensionClient(component: string, mgmtClient: ManagementClient): an
                     .reply(200, {});
 
                 const response = await extensionClient.service.show();
-                assert.deepStrictEqual(response, {});
+                assert.deepStrictEqual(response.data, {});
             });
         });
     });
@@ -336,7 +336,7 @@ describe('BIG-IP extension client specific tests: as3', function() {
                 .reply(200, {});
 
             const response = await extensionClient.service.delete();
-            assert.deepStrictEqual(response, {});
+            assert.deepStrictEqual(response.data, {});
         });
     });
 });
@@ -369,7 +369,7 @@ describe('BIG-IP extension client specific tests: do', function() {
                 .reply(200, {});
 
             const response = await extensionClient.service.showInspect();
-            assert.deepStrictEqual(response, {});
+            assert.deepStrictEqual(response.data, {});
         });
     });
 });
@@ -402,7 +402,7 @@ describe('BIG-IP extension client specific tests: cf', function() {
                 .reply(200, {});
 
             const response = await extensionClient.service.showInspect();
-            assert.deepStrictEqual(response, {});
+            assert.deepStrictEqual(response.data, {});
         });
 
         it(`should perform show trigger operation`, async function() {
@@ -411,7 +411,7 @@ describe('BIG-IP extension client specific tests: cf', function() {
                 .reply(200, {});
 
             const response = await extensionClient.service.showTrigger();
-            assert.deepStrictEqual(response, {});
+            assert.deepStrictEqual(response.data, {});
         });
 
         it(`should perform show trigger operation`, async function() {
@@ -420,7 +420,7 @@ describe('BIG-IP extension client specific tests: cf', function() {
                 .reply(200, {});
 
             const response = await extensionClient.service.trigger({ config: {} });
-            assert.deepStrictEqual(response, {});
+            assert.deepStrictEqual(response.data, {});
         });
 
         it(`should perform show reset operation`, async function() {
@@ -429,7 +429,7 @@ describe('BIG-IP extension client specific tests: cf', function() {
                 .reply(200, {});
 
             const response = await extensionClient.service.reset({ config: {} });
-            assert.deepStrictEqual(response, {});
+            assert.deepStrictEqual(response.data, {});
         });
     });
 });

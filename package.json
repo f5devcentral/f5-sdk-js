@@ -34,6 +34,7 @@
         "build-package": "tsc"
     },
     "dependencies": {
+        "@szmarczak/http-timer": "^4.0.5",
         "axios": "^0.19.2"
     },
     "devDependencies": {

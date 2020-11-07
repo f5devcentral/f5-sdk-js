@@ -69,7 +69,7 @@ export class ManagementClient {
                 }
             }
         );
-        this._token = response['token']['token'];
+        this._token = response['data']['token']['token'];
     }
 
     /**

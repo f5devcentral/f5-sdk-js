@@ -43,6 +43,6 @@ describe('BIG-IP: Management Client', function() {
 
         await mgmtClient.login();
         const response = await mgmtClient.makeRequest('/foo');
-        assert.deepStrictEqual(response, { foo: 'bar' })
+        assert.deepStrictEqual(response.data, { foo: 'bar' })
     });
 });
