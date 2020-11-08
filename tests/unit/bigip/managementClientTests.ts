@@ -10,39 +10,45 @@
 
 import assert from 'assert';
 import nock from 'nock';
+import { ManagementClient } from '../../../src/bigip';
 
-import { getManagementClient, defaultHost } from './fixtureUtils';
+import { getManagementClient, defaultHost, getFakeToken } from './fixtureUtils';
 
-describe('BIG-IP: Management Client', function() {
-    let mgmtClient;
 
-    beforeEach(function() {
+describe('BIG-IP: Management Client', function () {
+    let mgmtClient: ManagementClient;
+
+    beforeEach(function () {
         mgmtClient = getManagementClient();
     });
-    afterEach(function() {
-        if(!nock.isDone()) {
+    afterEach(function () {
+        if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`)
         }
         nock.cleanAll();
     });
 
-    it('should login', async function() {
+    // it('should login', async function() {
+    //     nock(`https://${defaultHost}`)
+    //         .post('/mgmt/shared/authn/login')
+    //         .reply(200, { token: { 'token': '1234' } });
+
+    //     await mgmtClient.login();
+    // });
+
+    it('should make request', async function () {
         nock(`https://${defaultHost}`)
             .post('/mgmt/shared/authn/login')
-            .reply(200, { token: { 'token': '1234' } });
-
-        await mgmtClient.login();
-    });
-
-    it('should make request', async function() {
-        nock(`https://${defaultHost}`)
-            .post('/mgmt/shared/authn/login')
-            .reply(200, { token: { 'token': '1234' } })
+            .reply(200, getFakeToken())
             .get('/foo')
             .reply(200, { foo: 'bar' });
 
-        await mgmtClient.login();
+        // await mgmtClient.login();
+        await mgmtClient.clearToken();
         const response = await mgmtClient.makeRequest('/foo');
-        assert.deepStrictEqual(response.data, { foo: 'bar' })
+        assert.deepStrictEqual(response?.data, { foo: 'bar' })
+        await mgmtClient.clearToken();
     });
+
+
 });

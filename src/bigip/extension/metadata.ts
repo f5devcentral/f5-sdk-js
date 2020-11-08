@@ -19,7 +19,7 @@ const EXTENSION_METADATA = {
 export class MetadataClient {
     protected _component: string;
     protected _componentVersion: string;
-    protected _metadata: object;
+    protected _metadata: unknown;
 
     /**
      *
@@ -147,7 +147,12 @@ export class MetadataClient {
      */
     async getLatestMetadata(): Promise<void> {
         const parsedUrl = httpUtils.parseUrl(EXTENSION_METADATA.url);
-        this._metadata = await httpUtils.makeRequest(parsedUrl.host, parsedUrl.path);
+        try {
+            const response = await httpUtils.makeRequest(parsedUrl.host, parsedUrl.path);
+            this._metadata = response.data;
+        } catch (e) {
+            console.log(e);
+        }
     }
 
     /**

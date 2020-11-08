@@ -17,25 +17,11 @@ import Logger from '../logger';
 import * as miscUtils from './misc';
 import assert from 'assert';
 
+import { HttpResponse } from '../models'
+
 const logger = Logger.getLogger();
 
-/**
- * custom http response based on axios response
- */
-export type HttpResponse = {
-    data?: unknown;
-    headers?: unknown;
-    status: number;
-    statusText?: string;
-    request?: {
-        url: string;
-        method: string;
-        headers: unknown;
-        protocol: string;
-        timings: unknown;
-        // data?: unknown;
-    };
-};
+
 
 /**
  * Used to inject http call timers
@@ -60,39 +46,42 @@ const transport = {
  */
 export async function makeRequest(host: string, uri: string, options?: {
     method?: any; /* eslint-disable-line @typescript-eslint/no-explicit-any */
-    port?: number;
-    body?: object;
+    port?: number | 443;
+    data?: object;
     headers?: object;
     basicAuth?: object;
     advancedReturn?: boolean;
 }): Promise<HttpResponse> {
-    options = options || {};
+    // options = options || {};
 
     logger.debug(`Making HTTP request: ${host} ${uri} ${miscUtils.stringify(options)}`);
 
-    const httpResponse = await axios.request<Response>({
+    const httpResponse = await axios.request({
         httpsAgent: new https.Agent({
             rejectUnauthorized: false
         }),
-        method: options['method'] || 'GET',
-        baseURL: `https://${host}:${options['port'] || 443}`,
+        method: options?.method ? options.method : 'GET',
+        baseURL: `https://${host}:${options?.port ? options?.port : 443}`,
         url: uri,
-        headers: options['headers'] !== undefined ? options['headers'] : {},
-        data: options['body'] || null,
-        auth: options['basicAuth'] !== undefined ? {
-            username: options['basicAuth']['user'],
-            password: options['basicAuth']['password']
-        } : null,
+        headers: options?.headers ? options?.headers : {},
+        data: options?.data ? options.data : null,
+        // auth: options['basicAuth'] !== undefined ? {
+        //     username: options['basicAuth']['user'],
+        //     password: options['basicAuth']['password']
+        // } : null,
         transport,
         validateStatus: null     // no need to set this if we aren't using it right now...
-    });
+    })
+    // .catch( err => {
+    //     const x = err;
+    // });
 
     // not sure what the use case is for on the following "advanced return"
     // withProgress might be a better solution if we are just looking for feedback on long
     // running requests
 
     // check for advanced return
-    if (options.advancedReturn) {
+    if (options?.advancedReturn) {
         return {
             data: httpResponse.data,
             status: httpResponse.status
@@ -105,7 +94,7 @@ export async function makeRequest(host: string, uri: string, options?: {
             `HTTP request failed: ${httpResponse.status} ${miscUtils.stringify(httpResponse.data)}`
         ));
     }
-    // return response body
+    // return response data
     return {
         data: httpResponse.data,
         headers: httpResponse.headers,

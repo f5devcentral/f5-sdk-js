@@ -6,7 +6,9 @@
  * the software product on devcentral.f5.com.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { ManagementClient } from '../../../src/bigip';
+import { Token } from '../../../src/models';
 
 export const defaultHost = '192.0.2.1';
 export const defaultPort = 443;
@@ -21,3 +23,31 @@ export function getManagementClient(): ManagementClient {
         password: defaultPassword
     });
 };
+
+
+/**
+ * inclusive random number generator
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+ * @param min 
+ * @param max 
+ */
+export function getRandomInt(min, max): number {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1) + min); //The maximum is inclusive and the minimum is inclusive 
+}
+
+
+
+/**
+ * generates a fake auth token with random value
+ */
+export function getFakeToken(): { token: Token } {
+    return {
+        token: {
+            token: uuidv4().split('-').pop(),
+            timeout: getRandomInt(300, 600)
+
+        }
+    }
+}

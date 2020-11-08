@@ -131,7 +131,7 @@ export class PackageClient {
     }> {
         const queryResponse = await this._mgmtClient.makeRequest(PKG_MGMT_URI, {
             method: 'POST',
-            body: {
+            data: {
                 operation: 'QUERY'
             }
         });
@@ -200,7 +200,7 @@ export class PackageClient {
             PKG_MGMT_URI,
             {
                 method: 'POST',
-                body: {
+                data: {
                     operation: 'INSTALL',
                     packageFilePath: packagePath
                 }
@@ -214,7 +214,7 @@ export class PackageClient {
             PKG_MGMT_URI,
             {
                 method: 'POST',
-                body: {
+                data: {
                     operation: 'UNINSTALL',
                     packageName
                 }
@@ -244,7 +244,7 @@ export class PackageClient {
                         'Content-Range': `${start}-${end}/${fileStats.size}`,
                         'Content-Length': end - start + 1
                     },
-                    body: fs.createReadStream(file, { start, end }),
+                    data: fs.createReadStream(file, { start, end }),
                     contentType: 'raw'
                 }
             );
