@@ -131,13 +131,13 @@ export class PackageClient {
     }> {
         const queryResponse = await this._mgmtClient.makeRequest(PKG_MGMT_URI, {
             method: 'POST',
-            body: {
+            data: {
                 operation: 'QUERY'
             }
         });
-        const response = await this._checkRpmTaskStatus(queryResponse['id']);
+        const response = await this._checkRpmTaskStatus(queryResponse['data']['id']);
         // find matching packages
-        const matchingPackages = response['queryResponse'].filter(
+        const matchingPackages = response['data']['queryResponse'].filter(
             (i: object) => componentPackageName == i['name']);
         // now grab the matched package name, typically only one match
         let packageName = null;
@@ -160,12 +160,12 @@ export class PackageClient {
         while (i < maxCount) {
             const response = await this._mgmtClient.makeRequest(`${PKG_MGMT_URI}/${taskId}`);
 
-            if (response['status'] === 'FINISHED') {
+            if (response['data']['status'] === 'FINISHED') {
                 return response;
-            } else if (response['status'] === 'FAILED') {
-                return Promise.reject(new Error(`RPM installation failed: ${response['errorMessage']}`));
+            } else if (response['data']['status'] === 'FAILED') {
+                return Promise.reject(new Error(`RPM installation failed: ${response['data']['errorMessage']}`));
             } else if (i > maxCount) {
-                return Promise.reject(new Error(`Max count exceeded, last response: ${response['errorMessage']}`));
+                return Promise.reject(new Error(`Max count exceeded, last response: ${response['data']['errorMessage']}`));
             }
 
             i += 1;
@@ -200,13 +200,13 @@ export class PackageClient {
             PKG_MGMT_URI,
             {
                 method: 'POST',
-                body: {
+                data: {
                     operation: 'INSTALL',
                     packageFilePath: packagePath
                 }
             }
         );
-        await this._checkRpmTaskStatus(response['id']);
+        await this._checkRpmTaskStatus(response['data']['id']);
     }
 
     protected async _uninstallRpm(packageName: string): Promise<void> {
@@ -214,13 +214,13 @@ export class PackageClient {
             PKG_MGMT_URI,
             {
                 method: 'POST',
-                body: {
+                data: {
                     operation: 'UNINSTALL',
                     packageName
                 }
             }
         );
-        await this._checkRpmTaskStatus(response['id']);
+        await this._checkRpmTaskStatus(response['data']['id']);
     }
 
     protected async _uploadRpm(file: string, options?: {
@@ -244,7 +244,7 @@ export class PackageClient {
                         'Content-Range': `${start}-${end}/${fileStats.size}`,
                         'Content-Length': end - start + 1
                     },
-                    body: fs.createReadStream(file, { start, end }),
+                    data: fs.createReadStream(file, { start, end }),
                     contentType: 'raw'
                 }
             );

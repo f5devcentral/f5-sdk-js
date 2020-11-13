@@ -29,11 +29,12 @@
     },
     "scripts": {
         "lint": "tsc --noEmit && eslint 'src/**/*.{js,ts,tsx}' 'tests/**/*.{js,ts,tsx}'",
-        "test": "nyc mocha -r ts-node/register \"tests/**/*Tests.ts\"",
+        "test": "nyc mocha -r ts-node/register \"tests/**/*.tests.ts\"",
         "build-code-docs": "typedoc --out code_docs src",
         "build-package": "tsc"
     },
     "dependencies": {
+        "@szmarczak/http-timer": "^4.0.5",
         "axios": "^0.19.2"
     },
     "devDependencies": {

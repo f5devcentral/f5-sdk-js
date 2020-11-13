@@ -11,7 +11,7 @@
 import assert from 'assert';
 import nock from 'nock';
 
-import { getManagementClient, defaultHost } from './fixtureUtils';
+import { getManagementClient, defaultHost, getFakeToken } from './fixtureUtils';
 
 import { ManagementClient } from '../../../src/bigip';
 import { AS3Client, DOClient, TSClient, CFClient } from '../../../src/bigip/extension';
@@ -71,22 +71,27 @@ function getExtensionClient(component: string, mgmtClient: ManagementClient): an
 ['as3', 'do', 'ts', 'cf'].forEach((component) => {
     describe(`BIG-IP extension client generic tests: ${component}`, function() {
         let extensionClient;
+        let mgmtClient: ManagementClient;
 
         beforeEach(async function() {
-            nock(`https://${defaultHost}`)
-                .post('/mgmt/shared/authn/login')
-                .reply(200, { token: { 'token': '1234' } });
+            // nock(`https://${defaultHost}`)
+            //     .post('/mgmt/shared/authn/login')
+            //     .reply(200, getFakeToken());
 
-            const mgmtClient = getManagementClient();
-            await mgmtClient.login();
+            mgmtClient = getManagementClient();
+            // await mgmtClient.login();
+
+            // clear any existing tokens, just to be safe
+            // await mgmtClient.clearToken();
 
             extensionClient = getExtensionClient(component, mgmtClient);
         });
-        afterEach(function() {
+        afterEach(async function() {
             if(!nock.isDone()) {
                 throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`)
             }
             nock.cleanAll();
+            // clear token since we are done with this test
         });
 
         it('should get latest metadata', async function() {
@@ -97,9 +102,11 @@ function getExtensionClient(component: string, mgmtClient: ManagementClient): an
             await extensionClient.getLatestMetadata();
         });
 
-        describe('Package Operations', function() {
+        describe('Package Operations', async function() {
             it(`should validate package is installed`, async function() {
                 nock(`https://${defaultHost}`)
+                    .post('/mgmt/shared/authn/login')
+                    .reply(200, getFakeToken())
                     .post('/mgmt/shared/iapp/package-management-tasks')
                     .reply(200, { id: '1234' })
                     .get('/mgmt/shared/iapp/package-management-tasks/1234')
@@ -118,10 +125,13 @@ function getExtensionClient(component: string, mgmtClient: ManagementClient): an
                 assert.strictEqual(response.installed, true);
                 assert.strictEqual(response.installedVersion, FIXED_INFO[component]['version']);
                 assert.notStrictEqual(response.latestVersion, '');
+                await mgmtClient.clearToken();
             });
         
             it(`should validate package is not installed`, async function() {
                 nock(`https://${defaultHost}`)
+                    .post('/mgmt/shared/authn/login')
+                    .reply(200, getFakeToken())
                     .post('/mgmt/shared/iapp/package-management-tasks')
                     .reply(200, { id: '1234' })
                     .get('/mgmt/shared/iapp/package-management-tasks/1234')
@@ -140,6 +150,7 @@ function getExtensionClient(component: string, mgmtClient: ManagementClient): an
                 assert.strictEqual(response.installed, false);
                 assert.strictEqual(response.installedVersion, '');
                 assert.notStrictEqual(response.latestVersion, '');
+                await mgmtClient.clearToken();
             });
         
             it(`should install package`, async function() {
@@ -147,6 +158,8 @@ function getExtensionClient(component: string, mgmtClient: ManagementClient): an
                     .get(uri => uri.includes('/'))
                     .reply(200, 'raw');
                 nock(`https://${defaultHost}`)
+                    .post('/mgmt/shared/authn/login')
+                    .reply(200, getFakeToken())
                     .post(uri => uri.includes('/mgmt/shared/file-transfer/uploads/'))
                     .reply(200, { id: '1234' })
                     .post('/mgmt/shared/iapp/package-management-tasks')
@@ -156,6 +169,7 @@ function getExtensionClient(component: string, mgmtClient: ManagementClient): an
                 
                 const response = await extensionClient.package.install();
                 assert.strictEqual(response['component'], component);
+                await mgmtClient.clearToken();
             });
         
             it(`should install package (+ wait for package management task completion)`, async function() {
@@ -163,6 +177,8 @@ function getExtensionClient(component: string, mgmtClient: ManagementClient): an
                     .get(uri => uri.includes('/'))
                     .reply(200, 'raw');
                 nock(`https://${defaultHost}`)
+                    .post('/mgmt/shared/authn/login')
+                    .reply(200, getFakeToken())
                     .post(uri => uri.includes('/mgmt/shared/file-transfer/uploads/'))
                     .reply(200, { id: '1234' })
                     .post('/mgmt/shared/iapp/package-management-tasks')
@@ -174,6 +190,7 @@ function getExtensionClient(component: string, mgmtClient: ManagementClient): an
                 
                 const response = await extensionClient.package.install();
                 assert.strictEqual(response['component'], component);
+                await mgmtClient.clearToken();
             });
 
             it(`should install package and perform file hash verification`, async function() {
@@ -181,6 +198,8 @@ function getExtensionClient(component: string, mgmtClient: ManagementClient): an
                     .get(uri => uri.includes('/'))
                     .reply(200, 'raw');
                 nock(`https://${defaultHost}`)
+                    .post('/mgmt/shared/authn/login')
+                    .reply(200, getFakeToken())
                     .post(uri => uri.includes('/mgmt/shared/file-transfer/uploads/'))
                     .reply(200, { id: '1234' })
                     .post('/mgmt/shared/iapp/package-management-tasks')
@@ -192,10 +211,13 @@ function getExtensionClient(component: string, mgmtClient: ManagementClient): an
                     hash: 'd7439bee24773bcbfa2d0a97947ee36227b10d1022b1a55847e928965bb6bfde'
                 });
                 assert.strictEqual(response['component'], component);
+                await mgmtClient.clearToken();
             });
         
             it(`should uninstall package`, async function() {
                 nock(`https://${defaultHost}`)
+                    .post('/mgmt/shared/authn/login')
+                    .reply(200, getFakeToken())
                     .post('/mgmt/shared/iapp/package-management-tasks')
                     .reply(200, { id: '1234' })
                     .get('/mgmt/shared/iapp/package-management-tasks/1234')
@@ -217,10 +239,13 @@ function getExtensionClient(component: string, mgmtClient: ManagementClient): an
                 const response = await extensionClient.package.uninstall();
                 assert.strictEqual(response['component'], component);
                 assert.strictEqual(response['version'], FIXED_INFO[component]['version']);
+                await mgmtClient.clearToken();
             });
         
             it(`should uninstall package (when package is not installed)`, async function() {
                 nock(`https://${defaultHost}`)
+                    .post('/mgmt/shared/authn/login')
+                    .reply(200, getFakeToken())
                     .post('/mgmt/shared/iapp/package-management-tasks')
                     .reply(200, { id: '1234' })
                     .get('/mgmt/shared/iapp/package-management-tasks/1234')
@@ -238,6 +263,7 @@ function getExtensionClient(component: string, mgmtClient: ManagementClient): an
                 const response = await extensionClient.package.uninstall();
                 assert.strictEqual(response['component'], component);
                 assert.strictEqual(response['version'], '');
+                await mgmtClient.clearToken();
             });
 
             it(`should list available component versions`, async function() {
@@ -246,45 +272,59 @@ function getExtensionClient(component: string, mgmtClient: ManagementClient): an
             });
         });
 
-        describe('Service Operations', function() {
+        describe('Service Operations', async function() {
             it(`should validate service is available`, async function() {
                 nock(`https://${defaultHost}`)
+                    .post('/mgmt/shared/authn/login')
+                    .reply(200, getFakeToken())
                     .get(FIXED_INFO[component]['endpoints']['primary'])
                     .reply(200, {});
 
                 const response = await extensionClient.service.isAvailable();
                 assert.strictEqual(response, true);
+                await mgmtClient.clearToken();
             });
 
             it(`should validate service is not available`, async function() {
                 nock(`https://${defaultHost}`)
+                    .post('/mgmt/shared/authn/login')
+                    .reply(200, getFakeToken())
                     .get(FIXED_INFO[component]['endpoints']['primary'])
                     .reply(500, {});
 
                 const response = await extensionClient.service.isAvailable();
                 assert.strictEqual(response, false);
+                await mgmtClient.clearToken();
             });
 
             it(`should show service info`, async function() {
                 nock(`https://${defaultHost}`)
+                    .post('/mgmt/shared/authn/login')
+                    .reply(200, getFakeToken())
                     .get(FIXED_INFO[component]['endpoints']['info'])
                     .reply(200, {});
 
                 const response = await extensionClient.service.showInfo();
-                assert.deepStrictEqual(response, {});
+                assert.deepStrictEqual(response.data, {});
+                await mgmtClient.clearToken();
             });
 
             it(`should perform create operation`, async function() {
                 nock(`https://${defaultHost}`)
+                    .post('/mgmt/shared/authn/login')
+                    .reply(200, getFakeToken())
                     .post(FIXED_INFO[component]['endpoints']['primary'])
                     .reply(200, {});
 
                 const response = await extensionClient.service.create({ config: {} });
                 assert.deepStrictEqual(response, {});
+                await mgmtClient.clearToken();
             });
 
             it(`should perform create operation (async task response)`, async function() {
                 nock(`https://${defaultHost}`)
+                    .post('/mgmt/shared/authn/login')
+                    .reply(200, getFakeToken())
                     .post(FIXED_INFO[component]['endpoints']['primary'])
                     .reply(202, { selfLink: 'https://localhost/task/1234'})
                     .get('/task/1234')
@@ -294,15 +334,19 @@ function getExtensionClient(component: string, mgmtClient: ManagementClient): an
 
                 const response = await extensionClient.service.create({ config: {} });
                 assert.deepStrictEqual(response, {});
+                await mgmtClient.clearToken();
             });
 
             it(`should perform show operation`, async function() {
                 nock(`https://${defaultHost}`)
+                    .post('/mgmt/shared/authn/login')
+                    .reply(200, getFakeToken())
                     .get(FIXED_INFO[component]['endpoints']['primary'])
                     .reply(200, {});
 
                 const response = await extensionClient.service.show();
-                assert.deepStrictEqual(response, {});
+                assert.deepStrictEqual(response.data, {});
+                await mgmtClient.clearToken();
             });
         });
     });
@@ -310,23 +354,27 @@ function getExtensionClient(component: string, mgmtClient: ManagementClient): an
 
 describe('BIG-IP extension client specific tests: as3', function() {
     let extensionClient;
+    let mgmtClient: ManagementClient;
     const component = 'as3';
 
     beforeEach(async function() {
         nock(`https://${defaultHost}`)
             .post('/mgmt/shared/authn/login')
-            .reply(200, { token: { 'token': '1234' } });
+            .reply(200, getFakeToken());
 
-        const mgmtClient = getManagementClient();
-        await mgmtClient.login();
+        
+        mgmtClient = getManagementClient();
+        // await mgmtClient.login();
+        await mgmtClient.clearToken();
 
         extensionClient = getExtensionClient(component, mgmtClient);
     });
-    afterEach(function() {
+    afterEach(async function() {
         if(!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`)
         }
         nock.cleanAll();
+        await mgmtClient.clearToken();
     });
 
     describe('Service Operations', function() {
@@ -336,30 +384,33 @@ describe('BIG-IP extension client specific tests: as3', function() {
                 .reply(200, {});
 
             const response = await extensionClient.service.delete();
-            assert.deepStrictEqual(response, {});
+            assert.deepStrictEqual(response.data, {});
         });
     });
 });
 
 describe('BIG-IP extension client specific tests: do', function() {
     let extensionClient;
+    let mgmtClient: ManagementClient;
     const component = 'do';
 
     beforeEach(async function() {
         nock(`https://${defaultHost}`)
             .post('/mgmt/shared/authn/login')
-            .reply(200, { token: { 'token': '1234' } });
+            .reply(200, getFakeToken);
 
-        const mgmtClient = getManagementClient();
-        await mgmtClient.login();
+        mgmtClient = getManagementClient();
+        // await mgmtClient.login();
+        await mgmtClient.clearToken();
 
         extensionClient = getExtensionClient(component, mgmtClient);
     });
-    afterEach(function() {
+    afterEach(async function() {
         if(!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`)
         }
         nock.cleanAll();
+        await mgmtClient.clearToken();
     });
 
     describe('Service Operations', function() {
@@ -369,30 +420,33 @@ describe('BIG-IP extension client specific tests: do', function() {
                 .reply(200, {});
 
             const response = await extensionClient.service.showInspect();
-            assert.deepStrictEqual(response, {});
+            assert.deepStrictEqual(response.data, {});
         });
     });
 });
 
 describe('BIG-IP extension client specific tests: cf', function() {
     let extensionClient;
+    let mgmtClient: ManagementClient;
     const component = 'cf';
 
     beforeEach(async function() {
         nock(`https://${defaultHost}`)
             .post('/mgmt/shared/authn/login')
-            .reply(200, { token: { 'token': '1234' } });
+            .reply(200, getFakeToken);
 
-        const mgmtClient = getManagementClient();
-        await mgmtClient.login();
-
+        mgmtClient = getManagementClient();
+        // await mgmtClient.login();
+        await mgmtClient.clearToken();
+        
         extensionClient = getExtensionClient(component, mgmtClient);
     });
-    afterEach(function() {
+    afterEach(async function() {
         if(!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`)
         }
         nock.cleanAll();
+        await mgmtClient.clearToken();
     });
 
     describe('Service Operations', function() {
@@ -402,7 +456,7 @@ describe('BIG-IP extension client specific tests: cf', function() {
                 .reply(200, {});
 
             const response = await extensionClient.service.showInspect();
-            assert.deepStrictEqual(response, {});
+            assert.deepStrictEqual(response.data, {});
         });
 
         it(`should perform show trigger operation`, async function() {
@@ -411,7 +465,7 @@ describe('BIG-IP extension client specific tests: cf', function() {
                 .reply(200, {});
 
             const response = await extensionClient.service.showTrigger();
-            assert.deepStrictEqual(response, {});
+            assert.deepStrictEqual(response.data, {});
         });
 
         it(`should perform show trigger operation`, async function() {
@@ -420,7 +474,7 @@ describe('BIG-IP extension client specific tests: cf', function() {
                 .reply(200, {});
 
             const response = await extensionClient.service.trigger({ config: {} });
-            assert.deepStrictEqual(response, {});
+            assert.deepStrictEqual(response.data, {});
         });
 
         it(`should perform show reset operation`, async function() {
@@ -429,7 +483,7 @@ describe('BIG-IP extension client specific tests: cf', function() {
                 .reply(200, {});
 
             const response = await extensionClient.service.reset({ config: {} });
-            assert.deepStrictEqual(response, {});
+            assert.deepStrictEqual(response.data, {});
         });
     });
 });

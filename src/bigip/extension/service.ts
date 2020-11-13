@@ -50,7 +50,7 @@ export class ServiceClient {
             }
         );
 
-        if (!response['statusCode'].toString().startsWith('2')) {
+        if (!response['status'].toString().startsWith('2')) {
             return false;
         }
         return true;
@@ -63,22 +63,22 @@ export class ServiceClient {
      *
      * @returns service API response
      */
-    async create(options: { config?: object }): Promise<object> {
+    async create(options: { config?: object }): Promise<unknown> {
         options = options || {};
 
         const response = await this._mgmtClient.makeRequest(
             this._metadataClient.getConfigurationEndpoint().endpoint,
             {
                 method: 'POST',
-                body: options.config,
+                data: options.config,
                 advancedReturn: true
             }
         );
 
-        if (response['statusCode'] === constants.HTTP_STATUS_CODES.ACCEPTED) {
-            return await this._waitForTask(response['body']['selfLink'].split(SELF_LINK_HOST)[1]);
+        if (response['status'] === constants.HTTP_STATUS_CODES.ACCEPTED) {
+            return await this._waitForTask(response['data']['selfLink'].split(SELF_LINK_HOST)[1]);
         }
-        return response['body'];
+        return response?.data;
     }
 
     /**
@@ -110,15 +110,15 @@ export class ServiceClient {
      *
      * @returns service API response
      */
-    protected async _checkTaskState(taskUri: string): Promise<object> {
+    protected async _checkTaskState(taskUri: string): Promise<unknown> {
         const taskResponse = await this._mgmtClient.makeRequest(taskUri, { advancedReturn: true });
 
-        if (taskResponse['statusCode'] !== constants.HTTP_STATUS_CODES.OK) {
+        if (taskResponse['status'] !== constants.HTTP_STATUS_CODES.OK) {
             return Promise.reject(
-                new Error(`Task state has not passed: ${taskResponse['statusCode']}`)
+                new Error(`Task state has not passed: ${taskResponse['status']}`)
             );
         }
-        return taskResponse['body'];
+        return taskResponse['data'];
     }
 
     /**
@@ -149,7 +149,7 @@ export class ServiceClient {
             this._metadataClient.getResetEndpoint().endpoint,
             {
                 method: 'POST',
-                body: options.config
+                data: options.config
             }
         );
     }
@@ -190,7 +190,7 @@ export class ServiceClient {
             this._metadataClient.getTriggerEndpoint().endpoint,
             {
                 method: 'POST',
-                body: options.config
+                data: options.config
             }
         );
     }
