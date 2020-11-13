@@ -8,9 +8,9 @@
 
 'use strict';
 
-// import { resolve } from 'path';
 import * as httpUtils from '../utils/http';
 import { HttpResponse, Token } from '../models'
+import { Method } from 'axios';
 
 
 
@@ -146,7 +146,7 @@ export class ManagementClient {
      * @returns request response
      */
     async makeRequest(uri: string, options?: {
-        method?: string;
+        method?: Method;
         headers?: object;
         data?: object;
         contentType?: string;

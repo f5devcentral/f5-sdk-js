@@ -10,25 +10,23 @@
 
 import * as fs from 'fs';
 import https from 'https';
-import axios, { AxiosRequestConfig } from 'axios';
-// const timer = require('@szmarczak/http-timer');
+import axios, { Method } from 'axios';
 import timer from '../../node_modules/@szmarczak/http-timer/dist/source';
 import Logger from '../logger';
 import * as miscUtils from './misc';
 import assert from 'assert';
 
 import { HttpResponse } from '../models'
+import { ClientRequest } from 'http';
 
 const logger = Logger.getLogger();
-
-
 
 /**
  * Used to inject http call timers
  * transport:request: httpsWithTimer
  */
 const transport = {
-    request: function httpsWithTimer(...args: any[]) {
+    request: function httpsWithTimer(...args: unknown[]): ClientRequest  {
         const request = https.request.apply(null, args)
         timer(request);
         return request;
@@ -45,7 +43,7 @@ const transport = {
  * @returns response data
  */
 export async function makeRequest(host: string, uri: string, options?: {
-    method?: any; /* eslint-disable-line @typescript-eslint/no-explicit-any */
+    method?: Method;
     port?: number | 443;
     data?: object;
     headers?: object;
@@ -174,7 +172,7 @@ export function parseUrl(url: string): {
     host: string;
     path: string;
 } {
-    // const a = url;
+    // exmple of using the following URL interface for parsing URLs
     const b = new URL(url);
     const c = {
         host: b.host,
