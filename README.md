@@ -21,58 +21,95 @@ Benefits:
 
 The high level goal here is to make an HTTP client that supports everything we need to take our tools to the next level.
 
-We were going down the path of moving to axios, but axios doesn't really support the depth of connectivity timings we want to gather and it's just another external dependecny...
+### http-timer for axios requests
 
-The timings will include the following:
-```js
-const eventTimes = {
-    // use process.hrtime() as it's not a subject of clock drift
-    startAt: process.hrtime(),
-    dnsLookupAt: undefined,
-    tcpConnectionAt: undefined,
-    tlsHandshakeAt: undefined,
-    firstByteAt: undefined,
-    endAt: undefined
+https://github.com/szmarczak/http-timer
+
+The above plugin adds the following timings object to the response of axios
+```typescript
+export interface Timings {
+    start: number;
+    socket?: number;
+    lookup?: number;
+    connect?: number;
+    secureConnect?: number;
+    upload?: number;
+    response?: number;
+    end?: number;
+    error?: number;
+    abort?: number;
+    phases: {
+        wait?: number;
+        dns?: number;
+        tcp?: number;
+        tls?: number;
+        request?: number;
+        firstByte?: number;
+        download?: number;
+        total?: number;
+    };
 }
+```
+
+### new HTTP Response type including the timings
+```typescript
+export type HttpResponse = {
+    data?: unknown;
+    headers?: unknown;
+    status: number;
+    statusText?: string;
+    request?: {
+        url: string;
+        method: string;
+        headers: unknown;
+        protocol: string;
+        timings: Timings;
+        // data?: unknown;
+    };
+};
 ```
 
 Using these timings we can log and provide stats about what devices (mainly f5) are responding slower than other or a gathered base line
 
-### Planned features
+### Upgrades!
 - Full request timings:  (DONE)
-  - Start of request processing
-  - Time it took to resolve dns (if needed)
-  - Time when TCP connection was completed
-  - Time when tls handshake was completed
-  - Time when first byte was recieved
-  - Time when last byte recieved and connection done
+  - See timing details above
+  - tests updated and working
 - token timer  (DONE)
   - Read token TTL and utilize for entire lifetime of token
   - refresh automatically as needed
-- Added support for remote authentication provider (DONE)
+  - probably need to add more error handling, but this is a good start
+  - tests updated and working
+- Added support for supplying remote authentication provider (DONE)
   - If none is supplied, the default 'local' is set
-- IPv6 support
-- bigiq support
+- IPv6 support (DONE)
+  - Tests with basic usage/connectivity
+- Added additional response details necessary for upper layer integration, like request details and full response details
+
+
+### Further plans (mostly in priority...)
+- layered functions that do all the work of uploading/downloadin files and capturing ucs/qkviews
+- Expand ils rpm installs to monitor restjavad/restnoded processes to complete restart for job completion
+  - Currently only seems to make sure the install process completed, not that the services have restarted and are ready for processing again.
+  - This needs to be monitored so other processes are not trying to use the service while it's restarting.  Depending on the host f5 config size and resources, this can take anywhere between 20 and 90 seconds.
+- bigiq specific support
   - confirm installing/uninstalling of ATC service (fast/as3/do/ts)
     - has different api... :(
   - confirm file upload/download
   - confirm bigiq ucs/qkview generation
   - service discovery
   - can we get the necessary details from the same CDN network?
-- Service discovery for ATC 
+- Service discovery for ATC (maybe?)
   - What services are installed
-- layered functions that do all the work of uploading/downloadin files and capturing ucs/qkviews
-- Support both http and https connections
+- Support both http and https connections (maybe?)
   - When connecting to an F5 device only HTTPS will be used
   - But there may be use cases where http is necessary for some sort of external connection
-- May leave open the option for connecting over a linux socket also...
+- May leave open the option for connecting over a linux socket also... (maybe?)
 - Possible support for following redirects
   - Should be part of axios client (just need to document how to use it)
-- Support for failed auth events
+- Support for failed auth events (probably not)
   - This is to allow the packege to be consumed by any other service, like a command line tool, but also be able to integrate into the vscode extension to clear password cache when authentication fails
   - Thinking more on this, it should probably be handled by whatever is utilizing the sdk
-- Expand ils rpm installs to monitor restjavad/restnoded processes to complete restart for job completion
-  - if it doesn't already do something similar
 
 ---
 

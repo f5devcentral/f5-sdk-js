@@ -52,7 +52,7 @@
                 "--timeout",
                 "999999",
                 "--colors",
-                "${workspaceFolder}/tests/**/*Tests.ts",
+                "${workspaceFolder}/tests/**/*.tests.ts",
             ],
             "internalConsoleOptions": "neverOpen",
             "protocol": "inspector",
