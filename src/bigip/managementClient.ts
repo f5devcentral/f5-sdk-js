@@ -14,47 +14,56 @@ import { HttpResponse, Token } from '../models'
 
 
 
+//  * Basic Example:
+//  * 
+//  * ```
+//  * const mgmtClient = new ManagementClient({
+//  *      host: '192.0.2.1',
+//  *      port: 443,
+//  *      user: 'admin',
+//  *      password: 'admin'
+//  * });
+//  * await mgmtClient.login();
+//  * await mgmtClient.makeRequest('/mgmt/tm/sys/version');
+//  * ```
+
 /**
- *
- * Basic Example:
+ *  Base bigip connectivity client
  * 
- * ```
- * const mgmtClient = new ManagementClient({
- *      host: '192.0.2.1',
- *      port: 443,
- *      user: 'admin',
- *      password: 'admin'
- * });
- * await mgmtClient.login();
- * await mgmtClient.makeRequest('/mgmt/tm/sys/version');
- * ```
+ * @param host
+ * @param port
+ * @param user
+ * @param options.password
+ * @param options.provider
+ * 
  */
 export class ManagementClient {
     host: string;
-    port: number | 443;
+    port: number;
     protected _user: string;
     protected _password: string;
     protected _provider: string;
     protected _token: Token;
     protected _tokenTimeout: number;
     protected _tokenIntervalId: NodeJS.Timeout;
-    // protected _tokenIntervalId: typeof setInterval;
 
     /**
      * @param options function options
      */
-    constructor(options: {
-        host: string;
-        port?: number;
-        user: string;
-        password: string;
-        provider?: string;
-    }) {
-        this.host = options['host'];
-        this.port = options['port'];
-        this._user = options['user'];
-        this._password = options['password'];
-        this._provider = options['provider'] || 'local';
+    constructor(
+        host: string,
+        user: string,
+        password: string,
+        options?: {
+            port?: number;
+            provider?: string;
+        }
+    ) {
+        this.host = host;
+        this._user = user;
+        this._password = password;
+        this.port = options?.port || 443;
+        this._provider = options?.provider || 'local';
     }
 
 
@@ -62,7 +71,7 @@ export class ManagementClient {
 
 
     /**
-     * clear auth token and clear timer
+     * clear auth token and timer
      *  - used for logging out/disconnecting, and testing
      */
     async clearToken (): Promise<void> {
@@ -71,15 +80,11 @@ export class ManagementClient {
     }
 
 
-
-
     
 
 
     /**
-     * Login (using credentials provided during instantiation)
      * sets/gets/refreshes auth token
-     * @returns void
      */
     private async getToken(): Promise<void> {
 
@@ -99,7 +104,9 @@ export class ManagementClient {
             }
         );
 
+        // capture entire token
         this._token = resp.data['token'];
+        // set token timeout for timer
         this._tokenTimeout = this._token.timeout;
 
         this.tokenTimer();  // start token timer
@@ -152,17 +159,20 @@ export class ManagementClient {
             await this.getToken();
         }
 
+        // todo: add logic to watch for failed/broken tokens, clear token when needed
+        // be able to clear the token if it expires before timer
+
         return await httpUtils.makeRequest(
             this.host,
             uri,
             {
-                method: options.method || 'GET',
+                method: options?.method || undefined,
                 port: this.port,
-                headers: Object.assign(options.headers || {}, {
+                headers: Object.assign(options?.headers || {}, {
                     'X-F5-Auth-Token': this._token
                 }),
-                data: options.data || undefined,
-                advancedReturn: options.advancedReturn || false
+                data: options?.data || undefined,
+                advancedReturn: options?.advancedReturn || false
             }
         );
     }

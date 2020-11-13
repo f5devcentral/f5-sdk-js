@@ -10,7 +10,7 @@
 
 import * as fs from 'fs';
 import https from 'https';
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 // const timer = require('@szmarczak/http-timer');
 import timer from '../../node_modules/@szmarczak/http-timer/dist/source';
 import Logger from '../logger';
@@ -56,25 +56,29 @@ export async function makeRequest(host: string, uri: string, options?: {
 
     logger.debug(`Making HTTP request: ${host} ${uri} ${miscUtils.stringify(options)}`);
 
-    const httpResponse = await axios.request({
-        httpsAgent: new https.Agent({
-            rejectUnauthorized: false
-        }),
-        method: options?.method ? options.method : 'GET',
-        baseURL: `https://${host}:${options?.port ? options?.port : 443}`,
-        url: uri,
-        headers: options?.headers ? options?.headers : {},
-        data: options?.data ? options.data : null,
-        // auth: options['basicAuth'] !== undefined ? {
-        //     username: options['basicAuth']['user'],
-        //     password: options['basicAuth']['password']
-        // } : null,
-        transport,
-        validateStatus: null     // no need to set this if we aren't using it right now...
-    })
-    // .catch( err => {
-    //     const x = err;
-    // });
+    let httpResponse;
+
+    // wrapped in a try for debugging
+    try {
+        httpResponse = await axios.request({
+            httpsAgent: new https.Agent({
+                rejectUnauthorized: false
+            }),
+            method: options?.method ? options.method : 'GET',
+            baseURL: `https://${host}:${options?.port ? options?.port : 443}`,
+            url: uri,
+            headers: options?.headers ? options?.headers : {},
+            data: options?.data ? options.data : null,
+            // auth: options['basicAuth'] !== undefined ? {
+            //     username: options['basicAuth']['user'],
+            //     password: options['basicAuth']['password']
+            // } : null,
+            transport,
+            validateStatus: null     // no need to set this if we aren't using it right now...
+        })
+    } catch (err) {
+        console.log(err);
+    }
 
     // not sure what the use case is for on the following "advanced return"
     // withProgress might be a better solution if we are just looking for feedback on long
